@@ -91,7 +91,7 @@ public class GameView extends View{
         creerBriques(); //
     }
     private void creerBriques (){ // méthode pour créer les briques
-        int lbrique = dl/8; // largeur des briques
+        int lbrique = dl/8; // largeur des briques = largeur de l'écran / 8 pour avoir 8 briques par rangées
         int Lbrique = dL / 16; // Longueur des briques
         for (int colone = 0; colone <8; colone++){
             for (int rg = 0; rg<3; rg++){
@@ -103,29 +103,31 @@ public class GameView extends View{
     @Override
     protected void onDraw (Canvas canvas ){
         super.onDraw(canvas);
-        canvas.drawColor(Color.BLACK);
+        canvas.drawColor(Color.BLACK); // Fond
+        // Mise à jour de la position de la balle
         balleX += vitesse.getX();
         balleY += vitesse.getY();
-        if ((balleX >= dl - balle.getWidth()) || balleX <= 0){
-            vitesse.setX(vitesse.getX() * -1);
+        if ((balleX >= dl - balle.getWidth()) || balleX <= 0){ // Collision avec les bords
+            vitesse.setX(vitesse.getX() * -1); // inverser la direction de la balle
         }
-        if (balleY <= 0){
-            vitesse.setY(vitesse.getY() * -1);
+        if (balleY <= 0){ // Collision avec le haut de l'écran
+            vitesse.setY(vitesse.getY() * -1); // Inverse la direction de la balle
         }
-        if (balleY > raquetteY + raquette.getHeight()) {
-            balleX = 1 + random.nextInt(dl - balle.getWidth() - 1);
+        if (balleY > raquetteY + raquette.getHeight()) { // si la balle dépasse la raquette
+            balleX = 1 + random.nextInt(dl - balle.getWidth() - 1); // Nouvelle position de la balle
             balleY = dL / 3;
             if (mprater != null) {
-                mprater.start();
+                mprater.start(); // mettre le son de rater
             }
-            vitesse.setX(xVitesse());
-            vitesse.setY(32);
-            vies--;
-            if (vies == 0) {
+            vitesse.setX(xVitesse()); // Nouvelle vitesse en X
+            vitesse.setY(32);  // Réinitialise la vitesse Y
+            vies--; // diminue le nombre de vies
+            if (vies == 0) { // q'il n'ya pas plus de vies, le jeu est terminé
                 gameOver = true;
                 ///LancerGameOver();
             }
         }
+            // On gère ici la collision entre la balle et la raquette
             if((balleX + balle.getWidth() >= raquetteX )
             && (balleX <= raquetteX + raquette.getWidth())
             && (balleY + balle.getHeight() >= raquetteY)
@@ -133,11 +135,12 @@ public class GameView extends View{
                 if ( mpfrapper != null){
                     mpfrapper.start();
                 }
-
-                vitesse.setY(-Math.abs(vitesse.getY() ));
+                vitesse.setY(-Math.abs(vitesse.getY() )); // Inverser la direction de la balle en Y
             }
+            // Dessiner la balle et la raquette
             canvas.drawBitmap(balle,balleX,balleY,null);
             canvas.drawBitmap(raquette, raquetteX,raquetteY,null);
+            //Dessiner les briques
             for(int i=0; i<numBriques;i++){
                 if(briques[i].getVisibility()){
                     canvas.drawRect(
@@ -150,13 +153,15 @@ public class GameView extends View{
 
                 }
             }
+            // Afficher le score et la barre des vies
             canvas.drawText(""+ points, 20, text_size,textPaint);
-            if(vies == 2){
+            if(vies == 2){ // S'il reste 2 vies on change la couleur de la barre des vies en jaune
                 viePaint.setColor(Color.YELLOW);
-            } else if (vies ==1) {
+            } else if (vies ==1) { // S'il reste 1 vie, la couleur de la barre de vie devient rouge
                 viePaint.setColor(Color.RED);
             }
             canvas.drawRect(dl-200,30,dl-200 + 60 * vies, 80,viePaint);
+            // On gère ici la collision entre la balle et la raquette
             for(int i=0; i<numBriques; i++){
                 if(briques[i].getVisibility()){
                     if(balleX + lballe >= briques[i].colone * briques[i].l
@@ -166,43 +171,44 @@ public class GameView extends View{
                         if (mpcasser != null){
                             mpcasser.start();
                         }
-                        vitesse.setY((vitesse.getY() + 1) * -1);
-                        briques[i].setInvisible();
-                        points += 10;
-                        brokenBriques++;
+                        vitesse.setY((vitesse.getY() + 1) * -1); // Inverser et augmenter la vitesse en Y
+                        briques[i].setInvisible(); // Cacher la brique
+                        points += 10; // augmenter le score de 10 POINTS
+                        brokenBriques++; // Incrémenter le compteur de briques cassées
                         if (brokenBriques == 24){
-                            //LancerGameOver();
+                            //LancerGameOver(); // Lancer la fin du jeu si toutes les briques sont cassées
                         }
                     }
                 }
             }
-            if ( brokenBriques == numBriques){
+            if ( brokenBriques == numBriques){ // fin du jeu si le nombre de briques = le nombre de briques cassées
                 gameOver = true;
             }
             if (!gameOver){
-                handler.postDelayed(runnable, UPDATE_MS);
+                handler.postDelayed(runnable, UPDATE_MS); // rafraichir l'écran si le jeu n'est pas terminé
             }
         }
-    
+
     @Override
+    // on gère les évènements tactiles pour déplacer la raquette
     public boolean onTouchEvent(MotionEvent event){
-        float toucheX = event.getX();
-        float toucheY = event.getY();
-        if ( toucheY >= raquetteY){
+        float toucheX = event.getX(); // coordonnées de X au toucher
+        float toucheY = event.getY(); //coordonnées de Y au toucher
+        if ( toucheY >= raquetteY){ // Si on touche en dessous de la raquette
             int action = event.getAction();
-            if (action == MotionEvent.ACTION_DOWN){
-                oldX = event.getX();
-                oldRaquetteX = raquetteX;
+            if (action == MotionEvent.ACTION_DOWN){ // Appui initial
+                oldX = event.getX(); // Enregistrer la position X initiale au toucher
+                oldRaquetteX = raquetteX; // Enregistrer la position initiale de la raquette
             }
-            if (action == MotionEvent.ACTION_MOVE){
-                float shift =  oldX - toucheX;
-                float NouvRaquetteX = oldRaquetteX - shift;
-                if (NouvRaquetteX <= 0)
+            if (action == MotionEvent.ACTION_MOVE){ // Mouvement du doigt
+                float shift =  oldX - toucheX; // Calcuyler le déplacement
+                float NouvRaquetteX = oldRaquetteX - shift; // Calculer la nouvelle position de la raquette
+                if (NouvRaquetteX <= 0) // Empêcher la raquette de sortir de l'écran à gauche
                     raquetteX = 0;
-                else if (NouvRaquetteX >= dl - raquette.getWidth())
+                else if (NouvRaquetteX >= dl - raquette.getWidth()) // Empêcher la raquette de sortir de l'écran à droite
                     raquetteX = dl - raquette.getWidth();
                 else
-                    raquetteX = NouvRaquetteX;
+                    raquetteX = NouvRaquetteX; // mettre à jour la position de la raquette
             }
         }
         return true;
@@ -219,8 +225,8 @@ public class GameView extends View{
     }
 
     private int xVitesse (){
-        int [] valeurs = {-35, -30, -25, 30, 35};
-        int index = random.nextInt(6);
+        int [] valeurs = {-35, -30, -25, 30, 35}; // Valeurs possibles de vitesse
+        int index = random.nextInt(6); //
         return valeurs [index];
 
     }
