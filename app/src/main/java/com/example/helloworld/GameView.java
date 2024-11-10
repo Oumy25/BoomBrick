@@ -10,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.media.MediaPlayer;
-import android.provider.MediaStore;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +19,7 @@ import java.util.Random;
 
 public class GameView extends View{
 
+    String niveau;
     Context context;
     float balleX, balleY;  //coordonnées de la balle
     Vitesse vitesse = new Vitesse(25,32); // vitesse initiale de la balle
@@ -45,9 +45,12 @@ public class GameView extends View{
     int brokenBriques =0; // compter le nombre de briques cassées
     boolean gameOver = false;
 
-    public GameView(Context context){
+    public GameView(Context context, String niveau){
         super(context);
         this.context = context;
+        // Stocke le niveau de jeu
+        this.niveau = niveau;
+
         // Charger l'image de la balle et de la raquette
         balle = BitmapFactory.decodeResource(getResources(), R.drawable.ballerouge);
         raquette = BitmapFactory.decodeResource(getResources(), R.drawable.raquette);
@@ -67,15 +70,18 @@ public class GameView extends View{
                 invalidate();
             }
         };
+
         // Chargement des sons
         mpfrapper = MediaPlayer.create(context, R.raw.mpfrapper);
         mprater = MediaPlayer.create(context, R.raw.mprater);
         mpcasser = MediaPlayer.create(context, R.raw.mpcasser);
+
         textPaint.setColor(Color.RED); // couleur du texte
         textPaint.setTextSize(text_size); // taille du texte
         textPaint.setTextAlign(Paint.Align.LEFT); // aligement du texte
         viePaint.setColor(Color.GREEN); // couleur de la barre de vies
         briquePaint.setColor(Color.CYAN); // couleur des briques
+
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();// récupère la taille de l'écran
         Point size = new Point();
         display.getSize(size);
@@ -88,25 +94,33 @@ public class GameView extends View{
         raquetteX = dl/2 - raquette.getWidth()/2; // Position de la raquette au centre de l'écran
         lballe = balle.getWidth(); // largeur de la balle
         Lballe = balle.getHeight(); // hauteur de la balle
+
         creerBriques(); //
     }
+
     private void creerBriques (){ // méthode pour créer les briques
         int lbrique = dl/8; // largeur des briques = largeur de l'écran / 8 pour avoir 8 briques par rangées
         int Lbrique = dL / 16; // Longueur des briques
+
         for (int colone = 0; colone <8; colone++){
             for (int rg = 0; rg<3; rg++){
-                briques[numBriques] = new Brique(rg, colone, lbrique,Lbrique);
+                // Si le niveau est medium, certaines briques de la 2e rangée deviennent incassables
+                boolean incassable = niveau.equals("medium") && (rg == 1 && colone %2 == 0);
+                briques[numBriques] = new Brique(rg,colone,lbrique,Lbrique, incassable);
                 numBriques++;
             }
         }
     }
+
     @Override
     protected void onDraw (Canvas canvas ){
         super.onDraw(canvas);
         canvas.drawColor(Color.BLACK); // Fond
+
         // Mise à jour de la position de la balle
         balleX += vitesse.getX();
         balleY += vitesse.getY();
+
         if ((balleX >= dl - balle.getWidth()) || balleX <= 0){ // Collision avec les bords
             vitesse.setX(vitesse.getX() * -1); // inverser la direction de la balle
         }
@@ -124,7 +138,7 @@ public class GameView extends View{
             vies--; // diminue le nombre de vies
             if (vies == 0) { // q'il n'ya pas plus de vies, le jeu est terminé
                 gameOver = true;
-                ///LancerGameOver();
+                LancerGameOver();
             }
         }
             // On gère ici la collision entre la balle et la raquette
@@ -137,12 +151,19 @@ public class GameView extends View{
                 }
                 vitesse.setY(-Math.abs(vitesse.getY() )); // Inverser la direction de la balle en Y
             }
+
             // Dessiner la balle et la raquette
             canvas.drawBitmap(balle,balleX,balleY,null);
             canvas.drawBitmap(raquette, raquetteX,raquetteY,null);
+
             //Dessiner les briques
             for(int i=0; i<numBriques;i++){
                 if(briques[i].getVisibility()){
+                    if(briques[i].isIncassable()){
+                        briquePaint.setColor(Color.GRAY);
+                    } else {
+                        briquePaint.setColor(Color.CYAN);
+                    }
                     canvas.drawRect(
                             briques[i].colone * briques[i].l +1,
                             briques[i].rg * briques[i].L + 1,
@@ -161,6 +182,7 @@ public class GameView extends View{
                 viePaint.setColor(Color.RED);
             }
             canvas.drawRect(dl-200,30,dl-200 + 60 * vies, 80,viePaint);
+
             // On gère ici la collision entre la balle et la raquette
             for(int i=0; i<numBriques; i++){
                 if(briques[i].getVisibility()){
@@ -168,15 +190,27 @@ public class GameView extends View{
                     && balleX <= briques[i].colone * briques[i].l + briques[i].l
                     && balleY <= briques[i].rg * briques[i].L + briques[i].L
                     && balleY >= briques[i].rg * briques[i].L){
-                        if (mpcasser != null){
-                            mpcasser.start();
+                        //medium
+                        if (briques [i].isIncassable()){
+                            // la brique est incassable, la balle rebondit
+                            vitesse.setY((vitesse.getY()+1)* -1);
+                            if (mpfrapper != null){
+                                mpcasser.start();
+                            }
+                        } else {
+                            if (mpcasser != null) {
+                                mpcasser.start();
+                            }
+                            vitesse.setY((vitesse.getY() + 1) * -1); // Inverser et augmenter la vitesse en Y
+                            briques[i].setInvisible(); // Cacher la brique
+                            points += 10; // augmenter le score de 10 POINTS
+                            brokenBriques++; // Incrémenter le compteur de briques cassées
                         }
-                        vitesse.setY((vitesse.getY() + 1) * -1); // Inverser et augmenter la vitesse en Y
-                        briques[i].setInvisible(); // Cacher la brique
-                        points += 10; // augmenter le score de 10 POINTS
-                        brokenBriques++; // Incrémenter le compteur de briques cassées
+                        if (brokenBriques == numBriques -8){
+                            gameOver = true;
+                        }
                         if (brokenBriques == 24){
-                            //LancerGameOver(); // Lancer la fin du jeu si toutes les briques sont cassées
+                            LancerGameOver(); // Lancer la fin du jeu si toutes les briques sont cassées
                         }
                     }
                 }
@@ -215,10 +249,10 @@ public class GameView extends View{
     }
 
     private void LancerGameOver() {
-        /*handler.removeCallbacksAndMessages(null);
+        handler.removeCallbacksAndMessages(null);
         Intent intent = new Intent(context, GameOver.class);
         intent.putExtra("points", points);
-        context.startActivity(intent);*/
+        ((Activity) context).startActivity(intent);
         ((Activity) context).finish();
 
 
@@ -226,7 +260,7 @@ public class GameView extends View{
 
     private int xVitesse (){
         int [] valeurs = {-35, -30, -25, 30, 35}; // Valeurs possibles de vitesse
-        int index = random.nextInt(6); //
+        int index = random.nextInt(5); //
         return valeurs [index];
 
     }

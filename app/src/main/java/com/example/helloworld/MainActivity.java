@@ -19,8 +19,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
-    public void startgame(View view ){
-        GameView gameView = new GameView(this);
+    // démarre le jeu en mode "easy"
+    public void startGameEasy(View view ){
+        // Modif ici pour niveau medium j'"ai rajouté easy, yavait pas avant
+        GameView gameView = new GameView(this, "easy");
+        setContentView(gameView);
+    }
+    public void startGameMedium(View view){
+        GameView gameView = new GameView(this, "medium");
         setContentView(gameView);
     }
 }

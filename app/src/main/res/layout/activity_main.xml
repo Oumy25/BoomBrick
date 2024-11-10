@@ -66,20 +66,34 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.812" />
+        app:layout_constraintVertical_bias="0.976" />
 
     <ImageButton
         android:id="@+id/play"
         android:layout_width="103dp"
         android:layout_height="68dp"
         android:background="@android:drawable/ic_media_play"
-        android:onClick="startgame"
+        android:onClick="startGameEasy"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.532"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.607"
+        app:layout_constraintVertical_bias="0.621"
         tools:ignore="MissingConstraints" />
+
+    <ImageButton
+        android:id="@+id/btnmedium"
+        android:layout_width="119dp"
+        android:layout_height="87dp"
+        android:onClick="startGameMedium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.561"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.756"
+        android:background="@android:drawable/ic_media_ff" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -116,7 +130,5 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/img_2" />
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
