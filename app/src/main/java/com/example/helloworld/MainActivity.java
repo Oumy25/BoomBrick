@@ -29,4 +29,8 @@ public class MainActivity extends AppCompatActivity {
         GameView gameView = new GameView(this, "medium");
         setContentView(gameView);
     }
+    public void startGameSemiHard(View view){
+        GameView gameView = new GameView(this, "semi");
+        setContentView(gameView);
+    }
 }
