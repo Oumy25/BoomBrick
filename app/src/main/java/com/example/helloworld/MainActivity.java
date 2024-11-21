@@ -4,6 +4,7 @@ import static android.view.WindowManager.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -31,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
     }
     public void startGameSemiHard(View view){
         GameView gameView = new GameView(this, "semi");
+        setContentView(gameView);
+    }
+    public void startGameHard(View view){
+        GameView gameView = new GameView(this, "hard");
         setContentView(gameView);
     }
 }
