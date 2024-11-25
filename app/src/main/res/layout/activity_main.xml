@@ -71,6 +71,7 @@
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="italic"
+        android:onClick="openInstructions"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -125,7 +126,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.756"
+        app:layout_constraintVertical_bias="0.758"
         app:srcCompat="@drawable/easy_1" />
 
     <ImageButton
@@ -139,7 +140,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.756"
+        app:layout_constraintVertical_bias="0.758"
         app:srcCompat="@drawable/medium_1" />
 
     <ImageButton
@@ -153,7 +154,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.756"
+        app:layout_constraintVertical_bias="0.758"
         app:srcCompat="@drawable/difficult_1" />
 
     <ImageButton
@@ -167,7 +168,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.753"
+        app:layout_constraintVertical_bias="0.755"
         app:srcCompat="@drawable/challenge" />
 
 

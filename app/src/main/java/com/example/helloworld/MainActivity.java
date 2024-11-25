@@ -39,4 +39,8 @@ public class MainActivity extends AppCompatActivity {
         GameView gameView = new GameView(this, "hard");
         setContentView(gameView);
     }
+    public void openInstructions(View view){
+        OpenInstructions instructionsDialog = new OpenInstructions(this);
+        instructionsDialog.show();
+    }
 }

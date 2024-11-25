@@ -7,7 +7,7 @@
     android:background="#032C62"
     android:gravity="center"
     android:orientation="vertical"
-    android:visibility="visible">>
+    android:visibility="visible">
 
     <TextView
         android:id="@+id/game_over"
@@ -54,18 +54,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.009" />
 
-    <ImageView
-        android:id="@+id/record"
-        android:layout_width="52dp"
-        android:layout_height="41dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.044"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.023"
-        app:srcCompat="@drawable/record" />
-
     <TextView
         android:id="@+id/points"
         android:layout_width="wrap_content"
@@ -98,5 +86,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.533" />
 
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="115dp"
+        android:layout_height="63dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.04"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.011"
+        app:srcCompat="@drawable/record_barre" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
