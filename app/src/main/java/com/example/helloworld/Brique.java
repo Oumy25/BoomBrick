@@ -10,7 +10,9 @@ public class Brique {
     public boolean genereMalus;
     int typeMalus;
     int resistance;
-    public float positionX;
+    public int positionX;
+    public int positionY;
+
 
 
     public Brique (int rg, int colone, int L, int l, boolean b,boolean genereMalus,int typeMalus,int resistance,boolean isHard){
@@ -25,6 +27,7 @@ public class Brique {
         this.resistance = resistance;
         if (isHard){
             this.positionX = colone * l;
+            this.positionY = rg*L;
         }
     }
     public void setInvisible(){
