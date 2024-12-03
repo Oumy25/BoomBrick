@@ -43,9 +43,9 @@ public class OpenInstructions {
                         "<span style='font-size:20px; color:#ffffff;'>Break all the bricks to get points.</span>" +
                         "</div><br>" +
                         "<div>" +
-                        "<img src='bonus' style='vertical-align:middle; margin-right:10px;'/>" +
-                        "<span style='font-size:22px; font-weight:bold; color:#073067;'><b>3. Bonus<b></span><br>" +
-                        "<span style='font-size:20px; color:#ffffff;'>Catch bonuses to enlarge the racket or have several balls.</span>" +
+                        "<img src='malus_instruc' style='vertical-align:middle; margin-right:10px;'/>" +
+                        "<span style='font-size:22px; font-weight:bold; color:#073067;'><b>3. Malus<b></span><br>" +
+                        "<span style='font-size:20px; color:#ffffff;'> Escape the maluses to avoid reducing the racket size .</span>" +
                         "</div><br>" +
                         "<div>" +
                         "<img src='life' style='vertical-align:middle; margin-right:10px;'/>" +
@@ -63,8 +63,8 @@ public class OpenInstructions {
                 case "bricks":
                     resId = R.drawable.bricks;
                     break;
-                case "bonus":
-                    resId = R.drawable.bonus;
+                case "malus_instruc":
+                    resId = R.drawable.malus_instruc;
                     break;
                 case "life":
                     resId = R.drawable.life;

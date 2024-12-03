@@ -2,8 +2,10 @@ package com.example.helloworld;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,7 +22,9 @@ public class GameOver extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState){
         super .onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.game_over);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //record = findViewById(R.id.record);
         tvPoints=findViewById(R.id.tvpoints);

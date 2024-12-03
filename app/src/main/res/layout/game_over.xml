@@ -44,7 +44,7 @@
         android:id="@+id/home"
         android:layout_width="83dp"
         android:layout_height="65dp"
-        android:background="@drawable/home"
+        android:background="@drawable/home_blanc"
         android:onClick="home"
         android:tint="@color/cardview_light_background"
         app:layout_constraintBottom_toBottomOf="parent"
