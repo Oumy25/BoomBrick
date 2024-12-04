@@ -36,11 +36,19 @@ public class GameOver extends AppCompatActivity {
         tvPoints.setText(String.valueOf(points));
     }
     public void restart(View view){
+        String level = getIntent().getStringExtra("level");
+
+        // Retourner au niveau précédent
         Intent intent = new Intent(GameOver.this, MainActivity.class);
+        intent.putExtra("restart", true);
+        intent.putExtra("level", level);
         startActivity(intent);
         finish();
     }
     public void menu (View view){
+        Intent intent = new Intent(GameOver.this, MainActivity.class);
+        intent.putExtra("restart", false); // Pas un redémarrage, retour au menu
+        startActivity(intent);
         finish();
     }
 }
