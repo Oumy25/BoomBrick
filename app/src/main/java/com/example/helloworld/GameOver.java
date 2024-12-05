@@ -39,15 +39,18 @@ public class GameOver extends AppCompatActivity {
         String level = getIntent().getStringExtra("level");
 
         // Retourner au niveau précédent
-        Intent intent = new Intent(GameOver.this, MainActivity.class);
-        intent.putExtra("restart", true);
-        intent.putExtra("level", level);
-        startActivity(intent);
-        finish();
+
+            Intent intent = new Intent(GameOver.this, MainActivity.class);
+            intent.putExtra("restart", true);
+            intent.putExtra("level", level);
+            startActivity(intent);
+            finish();
+
+
     }
-    public void menu (View view){
+    public void home (View view){
         Intent intent = new Intent(GameOver.this, MainActivity.class);
-        intent.putExtra("restart", false); // Pas un redémarrage, retour au menu
+        intent.putExtra("home", true);
         startActivity(intent);
         finish();
     }

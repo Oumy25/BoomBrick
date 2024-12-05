@@ -32,6 +32,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class GameView extends View{
 
@@ -105,11 +106,16 @@ public class GameView extends View{
     private int headerHeight = 110; // Hauteur totale du rectangle supérieur (pixels)
     private boolean gagner = false;
     private Bitmap backgroundBitmap;
+    boolean showMoveMessage = true; // Affiche le message au début
 
 
     public GameView(Context context, String niveau){
         super(context);
-        homeButtonBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home_blanc); // Remplacez `home_button` par l'identifiant de votre ressource
+        this.context = context;
+        // Stocke le niveau de jeu
+        this.niveau = niveau;
+
+        homeButtonBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home_blanc); // Bouton Home pour revenir à la page d'accueil
         int homeButtonSize = 100; // Taille en pixels
         homeButtonBitmap = Bitmap.createScaledBitmap(
                 BitmapFactory.decodeResource(getResources(), R.drawable.home_blanc),
@@ -117,17 +123,15 @@ public class GameView extends View{
                 homeButtonSize,
                 false
         );
-        this.context = context;
-        // Stocke le niveau de jeu
-        this.niveau = niveau;
 
+        // Choix des vitesses par niveau
         if (niveau.equals("medium")){
             vitesse = new Vitesse(25, 30);
         } else {
             vitesse = new Vitesse(25,32);
         }
 
-        // Charger l'image de la balle et de la raquette
+        // Charger l'image de la balle, de la raquette, du malus et de la balle Malus
         balle = BitmapFactory.decodeResource(getResources(), R.drawable.ballerouge);
         raquette = BitmapFactory.decodeResource(getResources(), R.drawable.raquette);
         malusRaquetteImage = BitmapFactory.decodeResource(getResources(),R.drawable.malus_raquette);
@@ -142,7 +146,7 @@ public class GameView extends View{
         raquette = Bitmap.createScaledBitmap(raquette,newlraquette,newLraquette, false);
         // ajout du malus
         malusRaquetteImage = Bitmap.createScaledBitmap(malusRaquetteImage,100,100,false);
-        malusVitesseImage = Bitmap.createScaledBitmap(malusVitesseImage,150,150,false);
+        malusVitesseImage = Bitmap.createScaledBitmap(malusVitesseImage,100,100,false);
 
         // Détecter l'orientation de l'écran
         int rotation = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE))
@@ -180,88 +184,88 @@ public class GameView extends View{
         lballe = balle.getWidth(); // largeur de la balle
         Lballe = balle.getHeight(); // hauteur de la balle
         resistances = new int [1000];
+
         // gestion de la raquette avec l'inclinaison du téléphone
         if (niveau.equals("hard")) {
-            if (niveau.equals("hard")) {
-                sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-                accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
-                if (accelerometer != null) {
-                    sensorEventListener = new SensorEventListener() {
-                        @Override
-                        public void onSensorChanged(SensorEvent event) {
-                            float xTilt;
+            if (accelerometer != null) {
+                sensorEventListener = new SensorEventListener() {
+                    @Override
+                    public void onSensorChanged(SensorEvent event) {
+                        float xTilt;
 
-                            if (rotation == Surface.ROTATION_270) {
-                                // Utiliser Y pour le mouvement horizontal en mode paysage gauche
-                                xTilt = event.values[1];
-                            } else if (rotation == Surface.ROTATION_90) {
-                                // Utiliser Y pour le mouvement horizontal en mode paysage droit
-                                xTilt = -event.values[1];
-                            } else {
-                                // Utiliser X pour les autres orientations
-                                xTilt = event.values[0];
-                            }
+                        if (rotation == Surface.ROTATION_270) {
+                            // Utiliser Y pour le mouvement horizontal en mode paysage gauche
+                            xTilt = event.values[1];
+                        } else if (rotation == Surface.ROTATION_90) {
+                            // Utiliser Y pour le mouvement horizontal en mode paysage droit
+                            xTilt = -event.values[1];
+                        } else {
+                            // Utiliser X pour les autres orientations
+                            xTilt = event.values[0];
+                        }
 
-                            if (!tiltCalibrated) {
-                                initialXTilt = xTilt; // Calibrer la position neutre
-                                tiltCalibrated = true;
-                            }
+                        if (!tiltCalibrated) {
+                            initialXTilt = xTilt; // Calibrer la position neutre
+                            tiltCalibrated = true;
+                        }
 
-                            // Ajuster la valeur d'inclinaison par rapport à la référence initiale
-                            float adjustedXTilt = xTilt - initialXTilt;
+                        // Ajuster la valeur d'inclinaison par rapport à la référence initiale
+                        float adjustedXTilt = xTilt - initialXTilt;
 
-                            if (!mvmBalle) {
-                                // Démarrer le jeu seulement après une inclinaison significative
-                                if (Math.abs(adjustedXTilt) > 5) {
-                                    mvmBalle = true;
-                                }
-                            }
-
-                            // Déplacer la raquette
-                            float newRaquetteX = raquetteX - adjustedXTilt * 10; // Sensibilité ajustée
-                            if (newRaquetteX <= 0) {
-                                raquetteX = 0;
-                            } else if (newRaquetteX >= dl - raquette.getWidth()) {
-                                raquetteX = dl - raquette.getWidth();
-                            } else {
-                                raquetteX = newRaquetteX;
+                        if (!mvmBalle) {
+                            // Démarrer le jeu seulement après une inclinaison significative
+                            if (Math.abs(adjustedXTilt) > 5) {
+                                mvmBalle = true;
                             }
                         }
 
-                        @Override
-                        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                            // Non utilisé ici
+                        // Déplacer la raquette
+                        float newRaquetteX = raquetteX - adjustedXTilt * 10; // Sensibilité ajustée
+                        if (newRaquetteX <= 0) {
+                            raquetteX = 0;
+                        } else if (newRaquetteX >= dl - raquette.getWidth()) {
+                            raquetteX = dl - raquette.getWidth();
+                        } else {
+                            raquetteX = newRaquetteX;
                         }
-                    };
+                    }
 
-                    sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+                    @Override
+                    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                        // Non utilisé ici
+                    }
+                };
+
+                sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_GAME);
                 } else {
                     throw new RuntimeException("Accelerometer not available on this device.");
                 }
             }
+            creerBriques(); //
         }
-        creerBriques(); //
-    }
 
     private void creerBriques (){ // méthode pour créer les briques
-        int lbrique = dL/25; // largeur des briques = largeur de l'écran / 8 pour avoir 8 briques par rangées
+        int lbrique = dL/25; // largeur des briques
         int Lbrique = dl/20; // Longueur des briques
-        int nbreRg = niveau.equals("easy") ? 10 : niveau.equals("medium") ? 10 : (niveau.equals("semi-hard") ? 5 : 7);
+        int nbreRg = niveau.equals("easy") ? 10 : niveau.equals("medium") ? 10 : (niveau.equals("semi-hard") ? 5 : 7); // nb de lignes de briques
         int resistance = 1;
         boolean isHard = niveau.equals("hard");
         // HARD
         Vhoriz = new int [1000];
         directionsRg = new int [nbreRg];
 
+        // dans le niveau challenge, chaque rangée de briques se déplace dans un sens
         if ( isHard){
             for (int rg = 0; rg<nbreRg; rg++) {
                 directionsRg[rg] = ( rg % 2 == 0) ? 1 : -1;
-                // directionsRg[rg] =  1;
             }
         }
-        for (int colone = 0; colone <20; colone++){
-            for (int rg = 0; rg<nbreRg; rg++){
+        for (int rg = 0; rg<nbreRg; rg++){
+            for (int colone = 0; colone <20; colone++){
+                int offset = (isHard && rg%2 != 0) ? dl / 2 : 0;
 
                 // Si le niveau est medium, certaines briques deviennent incassables
                 boolean incassable = niveau.equals("medium") &&
@@ -282,18 +286,15 @@ public class GameView extends View{
                 } else if (isHard) {
                     resistance = 2;
                 Vhoriz[numBriques] = directionsRg[rg];
-                /*Vhoriz[numBriques] = random.nextInt(10) + 5; // Vitesse entre 5 et 10
-                if (random.nextBoolean()) {
-                    Vhoriz [numBriques]= - Vhoriz [numBriques]; // se déplace aléatoirement vers la droite ou la gauche
-                }*/
+                }else{
+                    Vhoriz [numBriques]= - random.nextInt(10) + 5; // se déplace aléatoirement vers la droite ou la gauche
                 }
                 if (niveau.equals("hard") && ((rg % 2 == 0 && colone % 2 == 0) || (rg % 2 != 0 && colone % 2 != 1))) {
                     continue; // Ignore cette colonne
                 }
                 briques[numBriques] = new Brique(rg,colone,lbrique,Lbrique, incassable,(typeMalus !=0),typeMalus,resistance,isHard);
-                briques[numBriques].positionX = colone*lbrique;
+                briques[numBriques].positionX = offset + colone*lbrique;
                 numBriques++;
-
             }
         }
     }
@@ -321,13 +322,13 @@ public class GameView extends View{
             Vaccel = false;
         } else if (choix == 2){
             // ACCélérer la balle
-            vitesse.setX((int) (vitesse.getX() * 1.1)); //1.5
-            vitesse.setY((int) (vitesse.getY() * 1.1)); //1.5
+            vitesse.setX((int) (vitesse.getX() * 1.1));
+            vitesse.setY((int) (vitesse.getY() * 1.1));
             Vaccel = true;
         } else {
             //Vitesse normale
-            vitesse.setX((int) (vitesse.getX() / (Vaccel ? 1.1 : 0.7))); //1.5
-            vitesse.setY((int) (vitesse.getY() / (Vaccel ? 1.1 : 0.7))); //1.5
+            vitesse.setX((int) (vitesse.getX() / (Vaccel ? 1.1 : 0.7)));
+            vitesse.setY((int) (vitesse.getY() / (Vaccel ? 1.1 : 0.7)));
             Vaccel = false;
         }
     }
@@ -348,68 +349,16 @@ public class GameView extends View{
         }
         ballStime = System.currentTimeMillis(); // Enregistrer le temps de création
     }
-    private void gererBallesTemperatures(Canvas canvas){
-        long tempsActuel = System.currentTimeMillis();
 
-        // Vérifier les déclencheurs pour ajouter de nouvelles balles
-        if (points % SEUIL_SCORE == 0 && points > 0 && Addballs.isEmpty()) {
-            ajouterBallesTemporaires();
-        } else if (tempsActuel - lastBallTime > INT_ball && Addballs.isEmpty()) {
-            ajouterBallesTemporaires();
-            lastBallTime = tempsActuel;
-        }
-
-        // Mise à jour et dessin des balles temporaires
-        Iterator<Ball> iterator = Addballs.iterator();
-        while (iterator.hasNext()) {
-            Ball ball = iterator.next();
-
-            // Mise à jour des positions
-            ball.x += ball.vitesseX;
-            ball.y += ball.vitesseY;
-
-            // Collision avec les bords
-            if (ball.x <= 0 || ball.x + lballe >= dl) {
-                ball.vitesseX *= -1; // Rebondir sur les bords
-            }
-            if (ball.y <= 0) {
-                ball.vitesseY *= -1; // Rebondir sur le haut
-            }
-
-            // Collision avec la raquette
-            if (ball.x + lballe >= raquetteX && ball.x <= raquetteX + raquette.getWidth() &&
-                    ball.y + Lballe >= raquetteY && ball.y <= raquetteY + raquette.getHeight()) {
-                iterator.remove(); // Supprimer la balle si elle est touchée
-                continue;
-            }
-
-            // Si la balle tombe hors de l'écran
-            if (ball.y > dL) {
-                iterator.remove(); // Supprimer la balle
-                vies--; // Perte d'une vie
-                if (vies == 0) {
-                    gameOver = true;
-                    LancerGameOver();
-                    return;
-                }
-            }
-            // Dessiner la balle
-            canvas.drawBitmap(balle, ball.x, ball.y, null);
-        }
-        // Supprimer les balles temporaires après leur durée de vie
-        if (tempsActuel - ballStime > dureeBall) {
-            Addballs.clear();
-        }
-    }
 
     @Override
     protected void onDraw (Canvas canvas ){
         super.onDraw(canvas);
-        //canvas.drawColor(Color.BLACK); // Fond
-        backgroundBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.fond_arcade2);
+
+        backgroundBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.fond_arcade2); // fond de la page de la partie
         canvas.drawBitmap(backgroundBitmap,0,0,null);
         int blueColor = Color.parseColor("#012a61");
-        int screenWidth = getWidth();
+        int screenWidth = getWidth(); // largeur de l'écran
 
         // Bords
         Paint borderPaint_b = new Paint();
@@ -429,7 +378,7 @@ public class GameView extends View{
         contourPaint.setStyle(Paint.Style.STROKE);
         contourPaint.setStrokeWidth(3); // Épaisseur du contour
 
-        canvas.drawRect(0, 0, screenWidth, headerHeight,new Paint(){{setColor(blueColor);}} ); // Zone bleue à gauche
+        canvas.drawRect(0, 0, screenWidth, headerHeight,new Paint(){{setColor(blueColor);}} ); // Zone bleue en haut de la page
         // Couleur blanche pour le bord
         Paint borderPaint = new Paint();
         borderPaint.setColor(Color.WHITE);
@@ -447,6 +396,23 @@ public class GameView extends View{
             return; // Ne dessinez rien d'autre tant que le calibrage n'est pas terminé
         }
 
+        // Affiche le message uniquement au début si le niveau est "challenge"
+        if (niveau.equals("hard") && showMoveMessage) {
+            Paint messagePaint = new Paint();
+            messagePaint.setColor(Color.WHITE); // Couleur du texte
+            messagePaint.setTextSize(80); // Taille du texte
+            messagePaint.setTextAlign(Paint.Align.CENTER); // Alignement du texte
+            canvas.drawText("Move your phone <-->", dl / 2, dL / 2, messagePaint);
+
+            // Désactiver l'affichage du message après un délai (1 seconde par exemple)
+            postDelayed(() -> {
+                showMoveMessage = false;
+                invalidate(); // Rafraîchir l'écran pour effacer le message
+            }, 1000);
+
+            return; // Ne dessiner que le message au début
+        }
+
         int [][] CouleursRg = {
                 {Color.parseColor("#E48A48"), Color.parseColor("#EF7607")},
                 {Color.parseColor("#85B4EC"), Color.parseColor("#004AAD")},
@@ -460,16 +426,19 @@ public class GameView extends View{
                 {Color.parseColor("#CED8FF"), Color.parseColor("#CB9DD8")},
         };
 
+        // Ajuster la position de début des briques pour éviter de chevaucher la barre supérieure
+        if(mvmBalle){
+            balleX += vitesse.getX();
+            balleY += vitesse.getY();
+        }
         // Dessiner le texte du score
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(40);
-        canvas.drawText("Score: " + points, 20, 50, textPaint);
+        canvas.drawText("Score: " + points, 90, 60, textPaint);
 
         // Dessiner les vies (sous forme de rectangles ou icônes)
         for (int i = 0; i < vies; i++) {
-            int rectX = screenWidth - 250 - i * 100;
-            /*viePaint.setColor(i == 0 ? Color.RED : (i == 1 ? Color.YELLOW : Color.GREEN)); // Couleur des vies
-            canvas.drawRect(rectX, 30, rectX+50, 70, viePaint); // Rectangles représentant les vies*/
+            int rectX = screenWidth - 450 - i * 100;
             if (vies > 0) {
                 // Assurez-vous que l'image de cœur est bien chargée depuis les ressources
                 Bitmap heartBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.heart);
@@ -477,19 +446,13 @@ public class GameView extends View{
                 canvas.drawBitmap(heartBitmap, rectX, 15, null);
             }
         }
-        canvas.drawBitmap(homeButtonBitmap, dl - 100, 5, null);
+        canvas.drawBitmap(homeButtonBitmap, dl - 200, 5, null);
 
         // Dessiner le bouton "Home"
         if (homeButtonBitmap == null) {
             homeButtonBitmap = Bitmap.createScaledBitmap(
                     BitmapFactory.decodeResource(getResources(), R.drawable.home_blanc), 70, 70, false
             );
-        }
-
-        // Ajuster la position de début des briques pour éviter de chevaucher la barre supérieure
-        if(mvmBalle){
-            balleX += vitesse.getX();
-            balleY += vitesse.getY();
         }
 
         if ((balleX >= dl - balle.getWidth()) || balleX <= 0){ // Collision avec les bords
@@ -567,7 +530,7 @@ public class GameView extends View{
 
                 // Dessiner les briques selon leur type et niveau
                 if (briques[i].isIncassable()) {
-                    briquePaint.setColor(Color.GRAY);
+                    briquePaint.setColor(Color.DKGRAY);
                     canvas.drawRect(left+5, top+5, right-5, bottom-5, borderPaint_b); // Dessiner les bords de la brique
                     canvas.drawRect(left, top, right, bottom, contourPaint); // Contour de la brique
                     briquePaint.setShader(null);
@@ -594,8 +557,8 @@ public class GameView extends View{
 
                     // Dessiner les bords lumineux
                     bordLumieuxPaint.setStyle(Paint.Style.STROKE);
-                    bordLumieuxPaint.setStrokeWidth(5); // Ajuster l'épaisseur du bord lumineux
-                    bordLumieuxPaint.setColor(Color.BLACK); // Par exemple, une couleur lumineuse
+                    bordLumieuxPaint.setStrokeWidth(5); // Ajuster l'épaisseur du bord lumineux à 5
+                    bordLumieuxPaint.setColor(Color.BLACK); // bord lumineux noir
                     canvas.drawRect(left, top, right, bottom, bordLumieuxPaint); // Bord lumineux autour de la brique
                 }
 
@@ -623,8 +586,8 @@ public class GameView extends View{
                 if (niveau.equals("hard")) {
                     collision = balleX + lballe >= briques[i].positionX
                             && balleX <= briques[i].positionX + briques[i].l
-                            && balleY + Lballe >=  briques[i].positionY
-                            && balleY <= briques[i].positionY + briques[i].L;
+                            && balleY + Lballe >=  headerHeight + borderHeight+briques[i].positionY
+                            && balleY <= headerHeight + borderHeight+briques[i].positionY + briques[i].L;
                 }else {
                     collision=  balleX + lballe >= briques[i].colone * briques[i].l
                             && balleX <= briques[i].colone * briques[i].l + briques[i].l
@@ -706,19 +669,7 @@ public class GameView extends View{
                 if (briques[i].getVisibility()) {
 
                     int direction = directionsRg[briques[i].rg];
-/*
-                    // Mettre à jour la position horizontale réelle
-                    briques[i].positionX += Vhoriz[i];
 
-                    // Vérifier si la brique dépasse les bords et la réinsérer
-                    if (briques[i].positionX + briques[i].l < 0) {
-                        briques[i].positionX = dl;
-                    } else if (briques[i].positionX > dl) {
-                        briques[i].positionX = -briques[i].l;
-                    }
-                    // Mettre à jour la colonne en fonction de la nouvelle position
-                    briques[i].colone = (int) (briques[i].positionX / briques[i].l);
-                }*/
                     if (briques[i].colone % 2 == 0) {
                         briques[i].positionX += direction * VbriqueHoriz;
                     } else {
@@ -737,29 +688,18 @@ public class GameView extends View{
                 }
                 // Activer l'effet sombre à des intervalles de temps réguliers
                 long tempsActuel = System.currentTimeMillis();
-                //gererBallesTemperatures(canvas);
 
                 if(tempsActuel - Lasteffet > INT_effet && !ecranSombre){
                     ecranSombre = true;
                     DbeffetSombre = tempsActuel; // Enregistrer le début de l'effet sombre
-                    //activerEffetSombre();
                     Lasteffet = tempsActuel;
                 }
-                // Vérifier si l'effet sombre est actif
+                // Appliquer l'effet sombre si actif
                 if(ecranSombre){
                     // Calcul de la durée écoulée depuis le début de l'effet
                     long tempsEffet = tempsActuel-DbeffetSombre;
                     // Si l'effet est toujours en cours, dessiner l'écran sombre
                     if(tempsEffet < Duree_effetSombre){
-                        /*Paint paintSombre = new Paint();
-                        paintSombre.setColor(Color.BLACK);
-                        paintSombre.setAlpha(150);
-                        canvas.drawRect(0,0,dl,dL,paintSombre); // Couvrir tout l'écran
-
-                        // Réduire la taille de l'écran
-                        float scaleFactor = 0.9f; // 90% de la taille originale
-                        canvas.save(); // Sauvegarder l'état initial du canvas
-                        canvas.scale(scaleFactor, scaleFactor, dl / 2f, dL / 2f); // Ré */
                         Paint darkPaint = new Paint();
                         darkPaint.setColor(Color.BLACK);
                         darkPaint.setAlpha(150); // Opacité (0 = transparent, 255 = opaque)
@@ -768,19 +708,12 @@ public class GameView extends View{
                         ecranSombre = false;
                     }
                 }
-                /*if(ecranSombre && (System.currentTimeMillis() - DbeffetSombre)< Duree_effetSombre){
-                    canvas.restore();
-                }
-                if(tempsActuel - LastChangement > Int_vitesse){
-                    ChangerVitesseBalle();
-                    LastChangement = tempsActuel;
-                }*/
                 if(points == 100 && tempsActuel - LastChangement > Int_vitesse){
                     ChangerVitesseBalle();
                     LastChangement = tempsActuel;
                 }
             }
-            }
+        }
 
         if (gagner) {
             // Arrêter les mises à jour de l'écran
@@ -837,6 +770,16 @@ public class GameView extends View{
     @Override
     // on gère les évènements tactiles pour déplacer la raquette
     public boolean onTouchEvent(MotionEvent event){
+        float toucheX = event.getX(); // coordonnées de X au toucher
+        float toucheY = event.getY(); //coordonnées de Y au toucher
+
+        // Vérifiez si le clic est dans la zone du bouton "home"
+        if (toucheX >= dl-200 && toucheX <= dl-200 + homeButtonBitmap.getWidth() &&
+                toucheY >= 15 && toucheY <= 15 + homeButtonBitmap.getHeight()) {
+            // Quittez la partie ou retournez à l'écran d'accueil
+            quitterPartie();
+            //return true;
+        }
         if (niveau.equals("hard")) {
             if (!mvmBalle && tiltCalibrated && event.getAction() == MotionEvent.ACTION_DOWN) {
                 mvmBalle = true; // Lancer la balle après que l'utilisateur touche l'écran
@@ -846,8 +789,7 @@ public class GameView extends View{
         if(!mvmBalle && event.getAction()==MotionEvent.ACTION_DOWN){
             mvmBalle = true;
         }
-        float toucheX = event.getX(); // coordonnées de X au toucher
-        float toucheY = event.getY(); //coordonnées de Y au toucher
+
         if ( toucheY >= raquetteY){ // Si on touche en dessous de la raquette
             int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN){ // Appui initial
@@ -855,7 +797,7 @@ public class GameView extends View{
                 oldRaquetteX = raquetteX; // Enregistrer la position initiale de la raquette
             }
             if (action == MotionEvent.ACTION_MOVE){ // Mouvement du doigt
-                float shift =  oldX - toucheX; // Calcuyler le déplacement
+                float shift =  oldX - toucheX; // Calculer le déplacement
                 float NouvRaquetteX = oldRaquetteX - shift; // Calculer la nouvelle position de la raquette
                 if (NouvRaquetteX <= 0) // Empêcher la raquette de sortir de l'écran à gauche
                     raquetteX = 0;
@@ -865,13 +807,7 @@ public class GameView extends View{
                     raquetteX = NouvRaquetteX; // mettre à jour la position de la raquette
             }
         }
-        // Vérifiez si le clic est dans la zone du bouton "home"
-        if (toucheX >= dl-100 && toucheX <= dl-100 + homeButtonBitmap.getWidth() &&
-                toucheY >= 15 && toucheY <= 15 + homeButtonBitmap.getHeight()) {
-            // Quittez la partie ou retournez à l'écran d'accueil
-            quitterPartie();
-            //return true;
-        }
+
         return true;
     }
 
